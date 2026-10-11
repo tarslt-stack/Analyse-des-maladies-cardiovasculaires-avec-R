@@ -1,0 +1,264 @@
+#---------------------------------------------------------------
+#          Importation et pretraitement des donnees
+#---------------------------------------------------------------
+
+# Importation des donnees
+data <- read.csv(url("https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data"), header = FALSE)
+
+# Modification du nom des colonnes
+colnames(data) <- c("age", "sex", "cp", "trestbps", "chol", "fbs", "restecg", "thalach", "exang", "oldpeak", "slope", "ca", "thal", "target")
+
+# Pretraitement de la colonne target
+data$target[data$target==2] <- 1
+data$target[data$target==3] <- 1
+data$target[data$target==4] <- 1
+
+# Suppression des valeurs manquantes
+valeurs_manquantes_ca <- which(data$ca %in% "?")
+valeurs_manquantes_thal <-which(data$thal %in% "?")
+valeurs_manquantes <- c(valeurs_manquantes_ca, valeurs_manquantes_thal)
+valeurs_manquantes
+data <- data[-valeurs_manquantes,]
+
+# Vérification du type des variables
+str(data)
+
+# Modification du type des variables
+
+## Variables qualitatives (factor = variable qualitative)
+data$sex <- as.factor(data$sex)
+data$cp <- as.factor(data$cp)
+data$fbs <- as.factor(data$fbs)
+data$restecg <- as.factor(data$restecg)
+data$exang <- as.factor(data$exang)
+data$slope <- as.factor(data$slope)
+data$ca <- as.factor(data$ca)
+data$thal <- as.factor(data$thal)
+data$target <- as.factor(data$target)
+
+## Variables quantitatives
+data$age <- as.integer(data$age)
+data$trestbps <- as.integer(data$trestbps)
+data$chol <- as.integer(data$chol)
+data$thalach <- as.integer(data$thalach)
+
+# Recodage des variables
+levels(data$sex) <- c("Femme", "Homme")
+levels(data$cp) <- c("Angine stable", "Angine instable", "Autres douleurs", "Asymptomatique")
+levels(data$fbs) <- c("Non", "Oui")
+levels(data$restecg) <- c("Normal", "Anomalies", "Hypertrophie")
+levels(data$exang) <- c("Non", "Oui")
+levels(data$slope) <- c("En hausse", "Stable", "En baisse")
+levels(data$ca) <- c("Absence d'anomalie", "Faible", "Moyen", "Eleve")
+levels(data$thal) <- c("Non", "Thalassemie sous controle", "Thalassemie instable")
+levels(data$target) <- c("Non", "Oui")
+
+# Verification du type des variables
+str(data)
+
+# Verification valeurs manquantes
+apply(data, 2, anyNA)
+
+#---------------------------------------------------------------
+#                Statistiques descriptives
+#---------------------------------------------------------------
+
+# Indicateurs cles (variables qualitatives)
+
+# Variable sex
+table(data$sex) # Effectifs
+prop.table(table(data$sex)) # Frequences
+round(prop.table(table(data$sex)), 4) # Frequences arrondies
+round(prop.table(table(data$sex)), 4)*100 # Pourcentages
+
+# Variable cp
+table(data$cp)
+round(prop.table(table(data$cp)), 4)*100
+
+# Variable fbs
+table(data$fbs)
+round(prop.table(table(data$fbs)), 4)*100
+
+# Variable restecg
+table(data$restecg)
+round(prop.table(table(data$restecg)), 4)*100
+
+# Variable exang
+table(data$exang)
+round(prop.table(table(data$exang)), 4)*100
+
+# Variable slope
+table(data$slope)
+round(prop.table(table(data$slope)), 4)*100
+
+# Variable ca
+table(data$ca)
+round(prop.table(table(data$ca)), 4)*100
+
+# Variable thal
+table(data$thal)
+round(prop.table(table(data$thal)), 4)*100
+
+# Variable target
+table(data$target)
+round(prop.table(table(data$target)), 4)*100
+
+# --------------------
+
+# Indicateurs cles (variables quantitatives)
+
+## Minimum, quartiles, mediane, moyenne et maximum
+summary(data$age)
+summary(data$trestbps)
+summary(data$chol)
+summary(data$thalach)
+summary(data$oldpeak)
+
+## Variance et ecart-type
+var(data$age)
+sd(data$age) # Standard Deviation(à quel point les valeurs sont dispersées autour de la moyenne.)
+var(data$trestbps)
+sd(data$trestbps)
+var(data$chol)
+sd(data$chol)
+var(data$thalach)
+sd(data$thalach)
+var(data$oldpeak)
+sd(data$oldpeak)
+
+
+#---------------------------------------------------------------
+#                Graphiques (Data Visualization)
+#---------------------------------------------------------------
+
+# Diagrammes a barres (variables qualitatives)
+
+## Variable sex
+graph1 <- plot(data$sex,
+               xlab = "Sexe",
+               ylab = "Effectifs",
+               main = "Repartition des patients selon le sexe",
+               las = 1,
+               # horiz = T
+               sub = "Donnees : Heart Disease Data Set (UCI Machine Learning)",
+               # names.arg = c("Feminin", "Masculin"),
+               # space = 2
+               # col = "red"
+               col = c("#e63946", "#a8dadc"),
+               # border = "blue",
+               # density = 80,
+               # yaxt = 'n'
+               cex.main = 1.8,
+               cex.axis = 1,
+               cex.lab = 1.2,
+               ylim = c(0, 250)
+)
+text(x = graph1, y = table(data$sex)+10, labels = as.character(table(data$sex)), cex = 1.1, font = 3)
+
+## Variable cp
+graph2 <- plot(data$cp,
+               xlab = "Douleurs thoraciques",
+               ylab = "Effectifs",
+               main = "Repartition des patients selon les douleurs thoraciques",
+               space = 0.3,
+               col = c("#e63946", "#f1faee", "#a8dadc", "#457b9d"),
+               cex.main = 1.5,
+               cex.lab = 1.2,
+               ylim = c(0,170)
+)
+text(x = graph2, y = table(data$cp)+7, labels = as.character(table(data$cp)), cex = 1.1, font = 3)
+
+# --------------------
+
+# Diagramme circulaire (variables qualitatives)
+
+## Variable target
+pie(table(data$target),
+    main = "Repartition des patients selon l'apparition d'une maladie cardiovasculaire",
+    clockwise = TRUE,
+    col = c("#2a9d8f", "#f4a261"),
+    cex.main = 1.2,
+)
+
+# --------------------
+
+# Boite a moustaches (variables quantitatives)
+
+## Variable age
+boxplot(data$age,
+        ylab = "Age",
+        main = "Boite a moustache de la population selon l'age",
+        col = "#e63946",
+        las = 1,
+        cex.main = 1.7,
+        cex.lab = 1.2,
+        sub = "Donnees : Heart Disease Data Set (UCI Machine Learning)",
+        # horizontal = TRUE
+        notch = TRUE,
+        # border = "blue"
+        ylim = c(20,80)
+)
+
+# --------------------
+
+# Histogrammes (variables quantitatives)
+
+## Variable trestbps
+graph3 <- hist(data$trestbps,
+               xlab = "Tension arterielle au repos",
+               ylab = "Effectifs",
+               main = "Repartition des patients selon la tension arterielle au repos",
+               las = 1,
+               sub = "Donnees : Heart Disease Data Set (UCI Machine Learning)",
+               col = "lightslateblue",
+               ylim = c(0,80),
+               xlim = c(80,200),
+               cex.main = 1.4,
+               cex.lab = 1.2)
+text(x = graph3$mids, graph3$counts, labels = graph3$counts, adj = c(0.5, -0.5))
+
+# --------------------
+
+# Diagramme a barres croises
+
+## Variables target/sex
+graph4 <- barplot(table(data$target, data$sex),
+                  beside = TRUE,
+                  col = c("#003049", "#d62828"),
+                  xlab = "Sexe",
+                  ylab = "Patients",
+                  las = 1,
+                  main = "Repartition des patents selon la presence d'une maladie cardiovasculaire \n et le sexe",
+                  ylim = c(0,150),
+                  cex.main = 1.2,
+                  cex.lab = 1.2
+)
+legend("top", legend = levels(data$target), fill = c("#003049", "#d62828"), title = "Maladie cardiovasculaire", horiz = TRUE)
+text(x = graph4, y = table(data$target, data$sex)+7, labels = as.character(table(data$target, data$sex)), cex = 1.1, font = 3)
+
+# --------------------
+
+# Boites a moustaches croisees
+
+## Variable target/age
+boxplot(data$age ~ data$target,
+        main = "Boite a moustaches de la population selon l'age et la presence \n de maladie cardiovasculaire",
+        xlab = "Presence d'une maladie cardiovasculaire",
+        ylab = "Age",
+        col = "yellow",
+        las = 1,
+        ylim = c(20, 80),
+        cex.main = 1.2,
+        cex.lab = 1.2
+)
+
+## Variable target/trestbps
+boxplot(data$trestbps ~ data$target,
+        main = "Boite a moustaches de la population selon la tension arterielle au repos \n et la presence de maladie cardiovasculaire",
+        xlab = "Presence d'une maladie cardiovasculaire",
+        ylab = "Tension arterielle au repos",
+        col = "yellow",
+        las = 1,
+        cex.main = 1.2,
+        cex.lab = 1.2
+)
