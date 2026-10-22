@@ -262,3 +262,59 @@ boxplot(data$trestbps ~ data$target,
         cex.main = 1.2,
         cex.lab = 1.2
 )
+
+#---------------------------------------------------------------
+#                     Tests statistiques
+#---------------------------------------------------------------
+
+## Calcul des pourcentages
+round(prop.table(table(data$sex, data$target), margin = 1), 4)*100
+round(prop.table(table(data$cp, data$target), margin = 1), 4)*100
+round(prop.table(table(data$fbs, data$target), margin = 1), 4)*100
+round(prop.table(table(data$restecg, data$target), margin = 1), 4)*100
+round(prop.table(table(data$exang, data$target), margin = 1), 4)*100
+round(prop.table(table(data$slope, data$target), margin = 1), 4)*100
+round(prop.table(table(data$ca, data$target), margin = 1), 4)*100
+round(prop.table(table(data$thal, data$target), margin = 1), 4)*100
+
+## Test du Khi-2 (variables qualitatives)
+## H0 : Les deux variables sont independantes (si p-value > 0,05)
+## H1 : Les deux variables sont dependantes (si p-value < 0,05)
+chisq.test(data$sex, data$target)
+chisq.test(data$cp, data$target)
+chisq.test(data$fbs, data$target)
+chisq.test(data$restecg, data$target)
+chisq.test(data$exang, data$target)
+chisq.test(data$slope, data$target)
+chisq.test(data$ca, data$target)
+chisq.test(data$thal, data$target)
+
+## Calcul des moyennes
+tapply(data$age, data$target, mean)
+tapply(data$trestbps, data$target, mean)
+tapply(data$chol, data$target, mean)
+tapply(data$thalach, data$target, mean)
+tapply(data$oldpeak, data$target, mean)
+
+## Test de Shapiro-Wilk
+### H0 : L'echantillon suit une distribution normale (si p-value > 0,05)
+### H1 : L'echantillon ne suit pas une distribution normale (si p-value < 0,05)
+library(dplyr)
+shapiro.test(filter(data, target == "Oui")$age) # H1
+shapiro.test(filter(data, target == "Oui")$trestbps) # H1
+shapiro.test(filter(data, target == "Oui")$chol) # H0
+shapiro.test(filter(data, target == "Oui")$thalach) # H0
+shapiro.test(filter(data, target == "Oui")$oldpeak) # H1
+
+## Test de Mann-Whitney
+### H0 : Il n'y a pas de difference significative entre la moyenne des deux variables (si p-value > 0,05)
+### H1 : Il y a une difference significative entre la moyenne des deux variables (si p-value < 0,05)
+wilcox.test(data$age~data$target)
+wilcox.test(data$trestbps~data$target)
+wilcox.test(data$oldpeak~data$target)
+
+## Test de Student
+### H0 : Il n'y a pas de difference significative entre la moyenne des deux variables (si p-value > 0,05)
+### H1 : Il y a une difference significative entre la moyenne des deux variables (si p-value < 0,05)
+t.test(data$chol~data$target)
+t.test(data$thalach~data$target)
