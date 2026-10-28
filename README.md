@@ -19,6 +19,16 @@ R, RStudio et les graphiques de base de R (`plot`, `barplot`, `hist`, `boxplot`,
    - histogramme (tension artérielle au repos)
    - boîtes à moustaches (âge, tension), seules ou croisées avec la présence de maladie
    - diagramme à barres croisées (maladie selon le sexe)
+4. **J'ai réalisé des tests statistiques** :
+   - test du Khi-2 entre la maladie et chaque variable qualitative
+   - test de Shapiro-Wilk pour vérifier la normalité des variables quantitatives
+   - test de Mann-Whitney ou de Student pour comparer les moyennes selon la présence de maladie
+5. **J'ai construit un modèle de machine learning** :
+   - séparation des données en un jeu d'entraînement (80 %) et un jeu de test (20 %)
+   - création d'un modèle de régression logistique pour prédire la présence d'une maladie cardiovasculaire
+   - sélection des variables significatives (conservation notamment de `cp`, dont le retrait dégrade l'AIC : 202,23 sans contre 177,71 avec)
+   - prédictions sur le jeu de test avec un seuil de 0,5
+   - évaluation du modèle : matrice de confusion, test de Hosmer-Lemeshow et courbe ROC
 
 ## 🚀 Pour tester le projet
 1. Installer [R](https://cran.r-project.org/) et [RStudio](https://posit.co/download/rstudio-desktop/)
