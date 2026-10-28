@@ -263,6 +263,7 @@ boxplot(data$trestbps ~ data$target,
         cex.lab = 1.2
 )
 
+
 #---------------------------------------------------------------
 #                     Tests statistiques
 #---------------------------------------------------------------
@@ -318,3 +319,78 @@ wilcox.test(data$oldpeak~data$target)
 ### H1 : Il y a une difference significative entre la moyenne des deux variables (si p-value < 0,05)
 t.test(data$chol~data$target)
 t.test(data$thalach~data$target)
+
+
+
+
+
+#---------------------------------------------------------------
+#                     Machine Learning
+#---------------------------------------------------------------
+
+# Modele de regression logistique
+
+## Division du jeu de donnees en jeu d'entrainement et de test
+set.seed(99)
+library(caTools)
+split = sample.split(data$target, SplitRatio = 0.8)
+train = subset(data, split == TRUE)
+test = subset(data, split == FALSE)
+
+## Creation du modele
+RegressionLogistique = glm(target ~., data = train, family = "binomial")
+summary(RegressionLogistique)
+
+## Optimisation du modele de regression logistique pour ne conserver que les variables significatives
+RegressionLogistique = update(RegressionLogistique, .~.-restecg)
+RegressionLogistique = update(RegressionLogistique, .~.-slope)
+RegressionLogistique = update(RegressionLogistique, .~.-thal)
+RegressionLogistique = update(RegressionLogistique, .~.-age)
+RegressionLogistique = update(RegressionLogistique, .~.-fbs)
+RegressionLogistique = update(RegressionLogistique, .~.-chol)
+RegressionLogistique = update(RegressionLogistique, .~.-thalach)
+# RegressionLogistique = update(RegressionLogistique, .~.-cp)
+RegressionLogistique = update(RegressionLogistique, .~.-trestbps)
+summary(RegressionLogistique)
+# Critere AIC sans la variable cp : 202,23
+# Critere AIC avec la variable cp : 177,71
+
+## Predictions
+prediction = predict(RegressionLogistique, test, type = "response")
+prediction
+tableau_prediction = as.data.frame(prediction)
+creation_fonction = function(x){
+  return(ifelse(x>0.5,1,0))
+}
+tableau_prediction = apply(tableau_prediction, 2, creation_fonction)
+
+## Mesure des performances du modele
+levels(test$target) <- c(0,1)
+library(caret)
+confusionMatrix(as.factor(test$target), as.factor(tableau_prediction))
+
+## Tableau de comparaison
+tableau_comparaison = cbind(test, tableau_prediction)
+tableau_comparaison$prediction <- as.factor(tableau_comparaison$prediction)
+levels(tableau_comparaison$target) <- c("Non", "Oui")
+levels(tableau_comparaison$prediction) <- c("Non", "Oui")
+
+## Test de Hosmer et Lemeshow
+## H0 : L'ajustement du modele aux donnees est bon (si p-value > 0.05)
+## H1 : L'ajustement du modele aux donnees est mauvais (si p-value < 0.05)
+library(performance)
+performance_hosmer(RegressionLogistique)
+
+## Creation de la courbe ROC
+library(pROC)
+par(pty = "s")
+roc(train$target, RegressionLogistique$fitted.values,
+    plot = TRUE,
+    main = "Courbe ROC du modele de regression logistique",
+    col = "#377eb8",
+    lwd = 4,
+    xlab = "Taux de Faux Positifs",
+    ylab = "Taux de Vrais Positifs",
+    legacy.axes = TRUE
+)
+
